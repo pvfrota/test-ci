@@ -1,0 +1,29 @@
+name: Download data from Google Sheets and commit to repo
+
+on:
+  schedule:
+    - cron: "*/30 * * * *" # runs every 30 minutes
+  workflow_dispatch:
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Configure github-actions bot username
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
+      - name: Create directory if not exists
+        run : |
+          mkdir -p data
+      - name: Download data from Google Sheets
+        run: |
+          curl https://docs.google.com/spreadsheets/d/1EVBfLtTWaMIkbY00qTg_f-iAFdPrgoGE-tER2JHYNrE/gviz/tq\?tqx\=out:csv\&sheet\=173651259 > data/vaccination_by_date.csv
+          curl https://docs.google.com/spreadsheets/d/1EVBfLtTWaMIkbY00qTg_f-iAFdPrgoGE-tER2JHYNrE/gviz/tq\?tqx\=out:csv\&sheet\=2043107561 > data/vaccination_by_vaccination_site.csv
+          curl https://docs.google.com/spreadsheets/d/1EVBfLtTWaMIkbY00qTg_f-iAFdPrgoGE-tER2JHYNrE/gviz/tq\?tqx\=out:csv\&sheet\=0 > data/vaccination_by_zone.csv
+      - name: Commit data to github-pages
+        run: |
+          git add .
+          git commit -m "Update data $(date -u '+%Y-%m-%d %T') UTC"
+          git push
